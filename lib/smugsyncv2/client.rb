@@ -4,10 +4,11 @@ module Smugsyncv2
   class Client
     TOKEN_FILE = '.token_cache'
 
-    def initialize(key, secret, logger = false)
+    def initialize(key, secret, access_token, logger = false)
       @uris = nil
       @key = key
       @secret = secret
+      @access_token = access_token
       @logger = logger
     end
 
