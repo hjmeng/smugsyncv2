@@ -4,11 +4,12 @@ module Smugsyncv2
   class Client
     TOKEN_FILE = '.token_cache'
 
-    def initialize(key, secret, access_token, logger = false)
+    def initialize(key, secret, user_token, user_secret, logger = false)
       @uris = nil
       @key = key
       @secret = secret
-      @access_token = access_token
+      @user_token = user_token
+      @user_secret = user_secret
       @logger = logger
     end
 
@@ -22,7 +23,18 @@ module Smugsyncv2
 
     def login # rubocop:disable Metrics/MethodLength
       @consumer = OAuth::Consumer.new(@key, @secret, oauth_opts)
-      return load_cached_token if File.exist?(TOKEN_FILE)
+      if File.exist?(TOKEN_FILE)
+        @access_token = load_cached_token 
+        #overload access_token  with user_token and user_secret
+        if (!@user_token.empty?) 
+          @access_token.token = @user_token 
+        end
+        if (!@user_secret.empty?) 
+          @access_token.secret = @user_secret 
+        end        
+        return @access_token
+      end
+
       @request_token = @consumer.get_request_token
       authorize_url = @request_token.authorize_url + '&Access=Full'
       puts "Open a web browser and open: #{authorize_url}"
