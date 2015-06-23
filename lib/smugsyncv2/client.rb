@@ -2,7 +2,7 @@ require 'oauth/request_proxy/base'
 
 module Smugsyncv2
   class Client
-    TOKEN_FILE = '.token_cache'
+    TOKEN_FILE = '/tmp/.token_cache'
 
     def initialize(key, secret, user_token, user_secret, logger = false)
       @uris = nil
