@@ -108,7 +108,7 @@ module Smugsyncv2
         req.params.merge!(params)
         req.body = body
       end
-      @response = DeepOpenStruct.load(response.body)
+      @response = DeepOpenStruct.load(response)
     end
 
     def user
