@@ -108,22 +108,23 @@ module Smugsyncv2
         req.params.merge!(params)
         req.body = body
       end
-      @response = DeepOpenStruct.load(response.body)
+      @response = DeepOpenStruct.load({body: response.body, headers: response.headers})
+
     end
 
     def user
       res = request
-      uri = res.Response.Uris.AuthUser.Uri
+      uri = res.body.Response.Uris.AuthUser.Uri
       user = request(path: uri)
-      user = user.Response.User.Uris
+      user = user.body.Response.User.Uris
       @uris = user
     end
 
     def get_uri(name)
       uri = @uris.send(name).Uri
       request(path: uri)
-      if @response && @response.Response && @response.Response.send(name)
-        @uris = @response['Response'][name]['Uris']
+      if @response.body && @response.body.Response && @response.body.Response.send(name)
+        @uris = @response['body']['Response'][name]['Uris']
       end
       @response
     end
