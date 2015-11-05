@@ -26,10 +26,10 @@ module Smugsyncv2
       if File.exist?(TOKEN_FILE)
         @access_token = load_cached_token 
         #overload access_token  with user_token and user_secret
-        if (!@user_token.empty?) 
+        if (!@user_token.blank?) 
           @access_token.token = @user_token 
         end
-        if (!@user_secret.empty?) 
+        if (!@user_secret.blank?) 
           @access_token.secret = @user_secret 
         end        
         return @access_token
