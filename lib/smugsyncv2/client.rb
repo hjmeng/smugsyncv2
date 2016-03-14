@@ -23,15 +23,13 @@ module Smugsyncv2
 
     def login # rubocop:disable Metrics/MethodLength
       @consumer = OAuth::Consumer.new(@key, @secret, oauth_opts)
+      if (!@user_token.empty? && !@user_secret.empty?) 
+        @access_token = OAuth::AccessToken.new(@consumer, @user_token, @user_secret)
+        return @access_token
+      end
+      
       if File.exist?(TOKEN_FILE)
         @access_token = load_cached_token 
-        #overload access_token  with user_token and user_secret
-        if (!@user_token.empty?) 
-          @access_token.token = @user_token 
-        end
-        if (!@user_secret.empty?) 
-          @access_token.secret = @user_secret 
-        end        
         return @access_token
       end
 
