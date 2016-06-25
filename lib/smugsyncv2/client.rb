@@ -106,6 +106,17 @@ module Smugsyncv2
         req.params.merge!(params)
         req.body = body
       end
+      if response.body.blank?
+        url = File.join(API_ORIGIN,response.headers['location'])
+        response = @connection.send(method) do |req|
+          oauth_header = get_oauth_header(method, url, params)
+          req.headers.merge!('Authorization' => oauth_header)
+          req.url url
+          req.headers.merge!(headers)
+          req.params.merge!(params)
+          req.body = body
+        end
+      end
       @response = DeepOpenStruct.load({body: response.body, headers: response.headers})
 
     end
