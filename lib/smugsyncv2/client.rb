@@ -1,5 +1,4 @@
 require 'oauth/request_proxy/base'
-
 module Smugsyncv2
   class Client
     TOKEN_FILE = '/tmp/.token_cache'
@@ -92,32 +91,31 @@ module Smugsyncv2
     end
 
     def request(method: :get, path: nil, params: {}, body: {}, headers: {})
-      url     = path.nil? ? BASE_URL : File.join(API_ORIGIN, path)
+      url = path.nil? ? BASE_URL : File.join(API_ORIGIN, path)
       base_headers = { 'User-Agent' => USER_AGENT, 'Accept' => 'application/json' }
       headers = base_headers.merge(headers || {})
 
       adapter(url: url)
-      response = @connection.send(method) do |req|
-        oauth_header = get_oauth_header(method, url, params)
-        req.headers.merge!('Authorization' => oauth_header)
-
-        req.url url
-        req.headers.merge!(headers)
-        req.params.merge!(params)
-        req.body = body
-      end
+      request = Typhoeus::Request.new(
+        url,
+        method: method,
+        body: body,
+        params: params,
+        headers: {'Authorization' => get_oauth_header(method, url, params)}.merge!(headers)
+      )
+      response = request.run
       if response.body.blank?
         url = File.join(API_ORIGIN,response.headers['location'])
-        response = @connection.send(method) do |req|
-          oauth_header = get_oauth_header(method, url, params)
-          req.headers.merge!('Authorization' => oauth_header)
-          req.url url
-          req.headers.merge!(headers)
-          req.params.merge!(params)
-          req.body = body
-        end
+           request = Typhoeus::Request.new(
+            url,
+            method: method,
+            body: body,
+            params: params,
+            headers: {'Authorization' => get_oauth_header(method, url, params)}.merge!(headers)
+          )
+        response = request.run
       end
-      @response = DeepOpenStruct.load({body: response.body, headers: response.headers})
+      @response = DeepOpenStruct.load({body: JSON.parse(response.body), headers: response.headers})
 
     end
 
